@@ -20,13 +20,14 @@ class ViewController: UIViewController {
     @IBOutlet weak var segmentedControl: UISegmentedControl!
     
     var dataModel: ViewControllerDataModel = ViewControllerDataModel()
+    var gameEngine: GameEngine!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         
         setupUI()
-        generateProblem()
+        initializeGame()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -54,62 +55,49 @@ class ViewController: UIViewController {
         resultField.keyboardType = .decimalPad
     }
     
-    func generateProblem() {
-        
-        let selectedIndex: Int = segmentedControl.selectedSegmentIndex
-        let range = dataModel.ranges[selectedIndex]
-        
-        let firstDigit = Int.random(in: range)
-        let arithmeticOperator: String = ["+", "-", "x", "/"].randomElement()!
-        
-        var startingInteger: Int = range.lowerBound
-        var endingInteger: Int = range.upperBound
-        
-        if arithmeticOperator == "/" && startingInteger == 0 {
-            startingInteger = 1
-        }else if arithmeticOperator == "-" {
-            endingInteger = firstDigit
-        }
-        
-        let secondDigit = Int.random(in: startingInteger...endingInteger)
-        
-        problemLabel.text = "\(firstDigit) \(arithmeticOperator) \(secondDigit) ="
-        
-        switch arithmeticOperator {
-        case "+":
-            dataModel.result = Double(firstDigit + secondDigit)
-        case "-":
-            dataModel.result = Double(firstDigit - secondDigit)
-        case "x":
-            dataModel.result = Double(firstDigit * secondDigit)
-        case "/":
-            dataModel.result = Double(firstDigit) / Double(secondDigit)
+    func initializeGame() {
+        let difficulty = getDifficultyFromSegmentedControl()
+        gameEngine = GameEngine(difficulty: difficulty)
+        gameEngine.generateProblem()
+        updateUI()
+    }
+    
+    func getDifficultyFromSegmentedControl() -> Difficulty {
+        switch segmentedControl.selectedSegmentIndex {
+        case 0:
+            return .easy
+        case 1:
+            return .medium
+        case 2:
+            return .hard
         default:
-            dataModel.result = nil
+            return .easy
         }
     }
     
+    func updateUI() {
+        scoreLabel.text = "Score: \(gameEngine.score)"
+        problemLabel.text = gameEngine.problemText
+        
+        let seconds: String = String(format: "%02d", gameEngine.remainingTime)
+        timerLabel.text = "00 : \(seconds)"
+        
+        let totalTime = gameEngine.difficulty.remainingTime
+        progressView.progress = Float(totalTime - gameEngine.remainingTime) / Float(totalTime)
+        print("progressView.progress: \(progressView.progress)")
+    }
+    
     func scheduleTimer() {
-        dataModel.countDown = 2
         dataModel.timer?.invalidate()
         dataModel.timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(updateTimerUI), userInfo: nil, repeats: true)
     }
     
     @objc
     func updateTimerUI() {
-        dataModel.countDown -= 1
+        gameEngine.decrementTime()
+        updateUI()
         
-        let seconds: String = String(format: "%02d", dataModel.countDown)
-        
-//        if countDown < 10 {
-//            seconds = "0\(countDown)"
-//        }
-        
-        timerLabel.text = "00 : \(seconds)"
-        progressView.progress = Float(30 - dataModel.countDown) / 30
-        print("progressView.progress: \(progressView.progress)")
-        
-        if dataModel.countDown <= 0 {
+        if gameEngine.isGameOver() {
             finishTheGame()
         }
     }
@@ -128,16 +116,14 @@ class ViewController: UIViewController {
             return
         }
         
-        if newResult == dataModel.result {
+        if gameEngine.checkAnswer(newResult) {
             print("Correct answer!")
-            let selectedIndex = segmentedControl.selectedSegmentIndex
-            dataModel.score += dataModel.scoreAmount[selectedIndex]
-            scoreLabel.text = "Score: \(dataModel.score)"
         }else{
             print("Incorrect answer!")
         }
         
-        generateProblem()
+        gameEngine.generateProblem()
+        updateUI()
         resultField.text = nil
     }
     
@@ -146,11 +132,7 @@ class ViewController: UIViewController {
     }
     
     func restart() {
-        dataModel.score = 0
-        scoreLabel.text = "Score: 0"
-        
-        generateProblem()
-        
+        initializeGame()
         scheduleTimer()
         
         resultField.isEnabled = true
@@ -170,7 +152,7 @@ class ViewController: UIViewController {
     }
     
     func askForName() {
-        let alertController = UIAlertController(title: "Game is Over!", message: "Save your score: \(dataModel.score)", preferredStyle: .alert)
+        let alertController = UIAlertController(title: "Game is Over!", message: "Save your score: \(gameEngine.score)", preferredStyle: .alert)
         alertController.addTextField { textField in
             textField.placeholder = "Enter your name"
         }
@@ -202,108 +184,47 @@ class ViewController: UIViewController {
     }
     
     func saveUserScoreAsStruct(name: String) {
-        let userScore: UserScore = UserScore(name: name, score: dataModel.score)
+        let userScore: UserScore = UserScore(name: name, score: gameEngine.score)
+        let difficulty = gameEngine.difficulty
         
-        var level: Level?
-        switch segmentedControl.selectedSegmentIndex {
-        case 0:
-            level = .easy
-        case 1:
-            level = .medium
-        case 2:
-            level = .hard
-        default:
-            ()
-        }
-        
-        guard let level = level else {
-            print("Level is nil because index out of [0,1,2]")
-            return
-        }
-        
-        let userScoreArray: [UserScore] = ViewController.getAllUserScores(level: level) + [userScore]
+        let userScoreArray: [UserScore] = ViewController.getAllUserScores(level: difficulty) + [userScore]
         
         do {
-            
             let encoder = JSONEncoder()
             let encodedData = try encoder.encode(userScoreArray)
             let userDefaults = UserDefaults.standard
-            userDefaults.set(encodedData, forKey: level.key())
-            
+            userDefaults.set(encodedData, forKey: difficulty.key())
         } catch {
             print("Couldn't encode given [Userscore] into data with error: \(error.localizedDescription)")
         }
     }
     
-    static func getAllUserScores(level: Level) -> [UserScore] {
+    static func getAllUserScores(level: Difficulty) -> [UserScore] {
         var result: [UserScore] = []
         
         let userDefaults = UserDefaults.standard
         if let data = userDefaults.object(forKey: level.key()) as? Data {
-            
             do {
-                
                 let decoder = JSONDecoder()
                 result = try decoder.decode([UserScore].self, from: data)
-                
             } catch {
                 print("could'n decode given data to [Userscore] with error: \(error.localizedDescription)")
             }
-            
         }
-        
         return result
     }
     
-    func saveUserScore(name: String) {
-        let userScore: [String: Any] = ["name": name, "score": dataModel.score]
-        let userScoreArray: [[String: Any]] = getUserScoreArray() + [userScore]
-        
-        let userDefaults = UserDefaults.standard
-        userDefaults.set(userScoreArray, forKey: ViewControllerDataModel.userScoreKey)
-    }
-    
-    func getUserScoreArray() -> [[String: Any]] {
-        let userDefaults = UserDefaults.standard
-        let array = userDefaults.array(forKey: ViewControllerDataModel.userScoreKey) as? [[String: Any]]
-        return array ?? []
-    }
-}
-
-
-struct ViewControllerDataModel {
-    var timer: Timer?
-    var countDown: Int = 30
-    var result: Double?
-    var score: Int = 0
-    var ranges = [0...9, 10...99, 100...999]
-    var scoreAmount = [1, 2, 3]
-    
-    var navigationBarPreviousTintColor: UIColor?
-    
-    static let userScoreKey: String = "userScore"
-}
-
-
-struct UserScore: Codable {
-    let name: String
-    let score: Int
-}
-
-
-enum Level {
-    case easy
-    case medium
-    case hard
-    
-    func key() -> String {
-        switch self {
-        case .easy:
-            return "easyUserScore"
-        case .medium:
-            return "mediumUserScore"
-        case .hard:
-            return "hardUserScore"
-        }
-    }
+//    func saveUserScore(name: String) {
+//        let userScore: [String: Any] = ["name": name, "score": gameEngine.score]
+//        let userScoreArray: [[String: Any]] = getUserScoreArray() + [userScore]
+//        
+//        let userDefaults = UserDefaults.standard
+//        userDefaults.set(userScoreArray, forKey: ViewControllerDataModel.userScoreKey)
+//    }
+//    
+//    func getUserScoreArray() -> [[String: Any]] {
+//        let userDefaults = UserDefaults.standard
+//        let array = userDefaults.array(forKey: ViewControllerDataModel.userScoreKey) as? [[String: Any]]
+//        return array ?? []
+//    }
 }

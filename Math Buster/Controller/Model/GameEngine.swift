@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 
 struct GameEngine {
     var score: Int
@@ -19,8 +20,65 @@ struct GameEngine {
     }
     
     mutating func generateProblem() { // mutating keyword allows to modify the data of the instance of a struct or enum
+        let range = difficulty.range
         
+        let firstDigit = Int.random(in: range)
+        let arithmeticOperator: String = ["+", "-", "x", "/"].randomElement()!
+        
+        var startingInteger: Int = range.lowerBound
+        var endingInteger: Int = range.upperBound
+        
+        if arithmeticOperator == "/" && startingInteger == 0 {
+            startingInteger = 1
+        }else if arithmeticOperator == "-" {
+            endingInteger = firstDigit
+        }
+        
+        let secondDigit = Int.random(in: startingInteger...endingInteger)
+        
+        self.problemText = "\(firstDigit) \(arithmeticOperator) \(secondDigit) ="
+        
+        switch arithmeticOperator {
+        case "+":
+            self.expectedResult = Double(firstDigit + secondDigit)
+        case "-":
+            self.expectedResult = Double(firstDigit - secondDigit)
+        case "x":
+            self.expectedResult = Double(firstDigit * secondDigit)
+        case "/":
+            self.expectedResult = Double(firstDigit) / Double(secondDigit)
+        default:
+            self.expectedResult = nil
+        }
     }
+    
+    mutating func checkAnswer(_ answer: Double) -> Bool {
+        guard let expectedResult = expectedResult else { return false }
+        
+        if answer == expectedResult {
+            score += difficulty.scores
+            return true
+        }
+        return false
+    }
+    
+    mutating func decrementTime() {
+        remainingTime -= 1
+    }
+    
+    func isGameOver() -> Bool {
+        return remainingTime <= 0
+    }
+}
+
+struct ViewControllerDataModel {
+    var timer: Timer?
+    var navigationBarPreviousTintColor: UIColor?
+}
+
+struct UserScore: Codable {
+    let name: String
+    let score: Int
 }
 
 enum Difficulty {
@@ -50,17 +108,6 @@ enum Difficulty {
         }
     }
     
-    var key: String {
-        switch self {
-        case .easy:
-            return "easyUserScore"
-        case .medium:
-            return "mediumUserScore"
-        case .hard:
-            return "hardUserScore"
-        }
-    }
-    
     var remainingTime: Int {
         switch self {
         case .easy:
@@ -69,6 +116,17 @@ enum Difficulty {
             return 45
         case .hard:
             return 60
+        }
+    }
+    
+    func key() -> String {
+        switch self {
+        case .easy:
+            return "easyUserScore"
+        case .medium:
+            return "mediumUserScore"
+        case .hard:
+            return "hardUserScore"
         }
     }
 }
