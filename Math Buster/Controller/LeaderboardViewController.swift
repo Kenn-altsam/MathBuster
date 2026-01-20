@@ -1,13 +1,6 @@
-//
-//  WelcomeViewController.swift
-//  Math Buster
-//
-//  Created by Zhangali Pernebayev on 03.11.2022.
-//
-
 import UIKit
 
-class WelcomeViewController: UIViewController {
+class LeaderboardViewController: UIViewController {
     
     @IBOutlet weak var tableView: UITableView!
     
@@ -69,7 +62,7 @@ class WelcomeViewController: UIViewController {
 }
 
 //MARK: UITableViewDatasource & UITableViewDelegate
-extension WelcomeViewController: UITableViewDataSource, UITableViewDelegate {
+extension LeaderboardViewController: UITableViewDataSource, UITableViewDelegate {
     func numberOfSections(in tableView: UITableView) -> Int {
         return dataSource.count
     }

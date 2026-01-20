@@ -111,7 +111,7 @@ enum Difficulty {
     var remainingTime: Int {
         switch self {
         case .easy:
-            return 30
+            return 2
         case .medium:
             return 45
         case .hard:

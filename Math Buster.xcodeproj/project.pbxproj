@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0D2C49322913F6E7008B3B4E /* WelcomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D2C49312913F6E7008B3B4E /* WelcomeViewController.swift */; };
+		0D2C49322913F6E7008B3B4E /* LeaderboardViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D2C49312913F6E7008B3B4E /* LeaderboardViewController.swift */; };
 		0D43BF0B28F81AEE0053313D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D43BF0A28F81AEE0053313D /* AppDelegate.swift */; };
 		0D43BF0D28F81AEE0053313D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D43BF0C28F81AEE0053313D /* SceneDelegate.swift */; };
 		0D43BF0F28F81AEE0053313D /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D43BF0E28F81AEE0053313D /* ViewController.swift */; };
@@ -18,10 +18,13 @@
 		0D577E362918F149009C8479 /* ScoreTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0D577E342918F148009C8479 /* ScoreTableViewCell.xib */; };
 		0D5BEF89291A7A890049FB7A /* ScoreDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D5BEF87291A7A890049FB7A /* ScoreDetailViewController.swift */; };
 		0D5BEF8A291A7A890049FB7A /* ScoreDetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0D5BEF88291A7A890049FB7A /* ScoreDetailViewController.xib */; };
+		C940A8D72F1FED8800833838 /* DifficultyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C940A8D62F1FED8800833838 /* DifficultyViewController.swift */; };
+		C940A8DA2F1FF1A200833838 /* DifficultyTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C940A8D82F1FF1A200833838 /* DifficultyTableViewCell.swift */; };
+		C940A8DB2F1FF1A200833838 /* DifficultyTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = C940A8D92F1FF1A200833838 /* DifficultyTableViewCell.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		0D2C49312913F6E7008B3B4E /* WelcomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeViewController.swift; sourceTree = "<group>"; };
+		0D2C49312913F6E7008B3B4E /* LeaderboardViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderboardViewController.swift; sourceTree = "<group>"; };
 		0D43BF0728F81AEE0053313D /* Math Buster.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Math Buster.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		0D43BF0A28F81AEE0053313D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		0D43BF0C28F81AEE0053313D /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -34,6 +37,9 @@
 		0D577E342918F148009C8479 /* ScoreTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ScoreTableViewCell.xib; sourceTree = "<group>"; };
 		0D5BEF87291A7A890049FB7A /* ScoreDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreDetailViewController.swift; sourceTree = "<group>"; };
 		0D5BEF88291A7A890049FB7A /* ScoreDetailViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ScoreDetailViewController.xib; sourceTree = "<group>"; };
+		C940A8D62F1FED8800833838 /* DifficultyViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DifficultyViewController.swift; sourceTree = "<group>"; };
+		C940A8D82F1FF1A200833838 /* DifficultyTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DifficultyTableViewCell.swift; sourceTree = "<group>"; };
+		C940A8D92F1FF1A200833838 /* DifficultyTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = DifficultyTableViewCell.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -94,10 +100,11 @@
 				C940A8CD2F1EA3B000833838 /* Model */,
 				0D577E322918F139009C8479 /* Cell */,
 				0D43BF0E28F81AEE0053313D /* ViewController.swift */,
-				0D2C49312913F6E7008B3B4E /* WelcomeViewController.swift */,
+				0D2C49312913F6E7008B3B4E /* LeaderboardViewController.swift */,
 				0D43BF1028F81AEE0053313D /* Main.storyboard */,
 				0D5BEF87291A7A890049FB7A /* ScoreDetailViewController.swift */,
 				0D5BEF88291A7A890049FB7A /* ScoreDetailViewController.xib */,
+				C940A8D62F1FED8800833838 /* DifficultyViewController.swift */,
 			);
 			path = Controller;
 			sourceTree = "<group>";
@@ -115,6 +122,8 @@
 			children = (
 				0D577E332918F148009C8479 /* ScoreTableViewCell.swift */,
 				0D577E342918F148009C8479 /* ScoreTableViewCell.xib */,
+				C940A8D82F1FF1A200833838 /* DifficultyTableViewCell.swift */,
+				C940A8D92F1FF1A200833838 /* DifficultyTableViewCell.xib */,
 			);
 			path = Cell;
 			sourceTree = "<group>";
@@ -184,6 +193,7 @@
 				0D43BF1428F81AEF0053313D /* Assets.xcassets in Resources */,
 				0D577E362918F149009C8479 /* ScoreTableViewCell.xib in Resources */,
 				0D5BEF8A291A7A890049FB7A /* ScoreDetailViewController.xib in Resources */,
+				C940A8DB2F1FF1A200833838 /* DifficultyTableViewCell.xib in Resources */,
 				0D43BF1228F81AEE0053313D /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -197,10 +207,12 @@
 			files = (
 				0D5BEF89291A7A890049FB7A /* ScoreDetailViewController.swift in Sources */,
 				0D577E352918F148009C8479 /* ScoreTableViewCell.swift in Sources */,
+				C940A8D72F1FED8800833838 /* DifficultyViewController.swift in Sources */,
 				0D43BF0F28F81AEE0053313D /* ViewController.swift in Sources */,
-				0D2C49322913F6E7008B3B4E /* WelcomeViewController.swift in Sources */,
+				0D2C49322913F6E7008B3B4E /* LeaderboardViewController.swift in Sources */,
 				0D43BF0B28F81AEE0053313D /* AppDelegate.swift in Sources */,
 				0D43BF0D28F81AEE0053313D /* SceneDelegate.swift in Sources */,
+				C940A8DA2F1FF1A200833838 /* DifficultyTableViewCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

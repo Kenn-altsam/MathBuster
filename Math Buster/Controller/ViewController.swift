@@ -17,10 +17,13 @@ class ViewController: UIViewController {
     @IBOutlet weak var resultField: UITextField!
     @IBOutlet weak var submitButton: UIButton!
     @IBOutlet weak var restartButton: UIButton!
-    @IBOutlet weak var segmentedControl: UISegmentedControl!
+//    @IBOutlet weak var segmentedControl: UISegmentedControl!
     
     var dataModel: ViewControllerDataModel = ViewControllerDataModel()
     var gameEngine: GameEngine!
+    
+    var selectedDifficulty: Difficulty = .easy
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -40,13 +43,23 @@ class ViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        scheduleTimer()
+        if !gameEngine.isGameOver(){
+            scheduleTimer()
+        }
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         
         navigationController?.navigationBar.tintColor = dataModel.navigationBarPreviousTintColor
+        
+        dataModel.timer?.invalidate()
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        
+        dataModel.timer?.invalidate()
     }
 
     func setupUI() {
@@ -56,24 +69,24 @@ class ViewController: UIViewController {
     }
     
     func initializeGame() {
-        let difficulty = getDifficultyFromSegmentedControl()
-        gameEngine = GameEngine(difficulty: difficulty)
+//        let difficulty = getDifficultyFromSegmentedControl()
+        gameEngine = GameEngine(difficulty: selectedDifficulty)
         gameEngine.generateProblem()
         updateUI()
     }
     
-    func getDifficultyFromSegmentedControl() -> Difficulty {
-        switch segmentedControl.selectedSegmentIndex {
-        case 0:
-            return .easy
-        case 1:
-            return .medium
-        case 2:
-            return .hard
-        default:
-            return .easy
-        }
-    }
+//    func getDifficultyFromSegmentedControl() -> Difficulty {
+//        switch segmentedControl.selectedSegmentIndex {
+//        case 0:
+//            return .easy
+//        case 1:
+//            return .medium
+//        case 2:
+//            return .hard
+//        default:
+//            return .easy
+//        }
+//    }
     
     func updateUI() {
         scoreLabel.text = "Score: \(gameEngine.score)"
@@ -139,9 +152,9 @@ class ViewController: UIViewController {
         submitButton.isEnabled = true
     }
     
-    @IBAction func segmentedControlValueChanged(_ sender: UISegmentedControl) {
-        restart()
-    }
+//    @IBAction func segmentedControlValueChanged(_ sender: UISegmentedControl) {
+//        restart()
+//    }
     
     func finishTheGame() {
         dataModel.timer?.invalidate()
@@ -171,6 +184,8 @@ class ViewController: UIViewController {
             //TO DO: Save user score record permanently on device
 //            self.saveUserScore(name: text)
             self.saveUserScoreAsStruct(name: text)
+            
+            self.navigationController?.popViewController(animated: true)
         }
         alertController.addAction(saveAction)
         
