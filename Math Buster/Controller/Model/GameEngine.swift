@@ -5,6 +5,7 @@ struct GameEngine {
     var score: Int
     var remainingTime: Int
     let difficulty: Difficulty
+    var gameState: GameState
     
     private(set) var problemText: String?
     private(set) var expectedResult: Double?
@@ -16,7 +17,16 @@ struct GameEngine {
         self.remainingTime = difficulty.remainingTime
         self.problemText = nil
         self.expectedResult = nil
+        self.gameState = .idle
         generateProblem()
+    }
+    
+    mutating func startGame() {
+        gameState = .playing
+    }
+    
+    mutating func finishGame() {
+        gameState = .finished
     }
     
     mutating func generateProblem() { // mutating keyword allows to modify the data of the instance of a struct or enum
@@ -79,9 +89,26 @@ struct ViewControllerDataModel {
 struct UserScore: Codable {
     let name: String
     let score: Int
+    let difficulty: Difficulty
+    let date: Date
+    
+    func formattedDate() -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateStyle = .medium
+        dateFormatter.timeStyle = .short
+        return dateFormatter.string(from: date)
+    }
+    
+    static func formatDate(_ date: Date) -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateStyle = .medium
+        dateFormatter.timeStyle = .short
+        return dateFormatter.string(from: date)
+    }
+    
 }
 
-enum Difficulty {
+enum Difficulty: String, Codable {
     case easy
     case medium
     case hard
@@ -113,9 +140,9 @@ enum Difficulty {
         case .easy:
             return 2
         case .medium:
-            return 45
+            return 2
         case .hard:
-            return 60
+            return 2
         }
     }
     
@@ -129,5 +156,21 @@ enum Difficulty {
             return "hardUserScore"
         }
     }
+    
+    var displayName: String {
+        switch self{
+        case .easy:
+            return "Easy"
+        case .medium:
+            return "Medium"
+        case .hard:
+            return "Hard" 
+        }
+    }
 }
 
+enum GameState {
+    case idle
+    case playing
+    case finished
+}

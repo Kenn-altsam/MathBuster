@@ -17,21 +17,35 @@
                         <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
+                            <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="bCV-ds-AiL" userLabel="FilterSegmentedControl">
+                                <rect key="frame" x="20" y="158" width="350" height="32"/>
+                                <color key="backgroundColor" red="0.082456409931182861" green="1" blue="0.93725490570068359" alpha="0.84705883260000003" colorSpace="custom" customColorSpace="sRGB"/>
+                                <segments>
+                                    <segment title="All"/>
+                                    <segment title="Easy"/>
+                                    <segment title="Medium"/>
+                                    <segment title="Hard"/>
+                                </segments>
+                            </segmentedControl>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" estimatedSectionHeaderHeight="-1" sectionFooterHeight="28" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="JJ6-7R-59p">
-                                <rect key="frame" x="0.0" y="158" width="390" height="618"/>
+                                <rect key="frame" x="0.0" y="209" width="390" height="567"/>
                             </tableView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="QKD-ly-qzy"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
+                            <constraint firstItem="bCV-ds-AiL" firstAttribute="top" secondItem="QKD-ly-qzy" secondAttribute="top" constant="20" id="4CQ-Tb-s6Y"/>
                             <constraint firstItem="QKD-ly-qzy" firstAttribute="trailing" secondItem="JJ6-7R-59p" secondAttribute="trailing" id="4Sc-yq-Jkc"/>
                             <constraint firstItem="JJ6-7R-59p" firstAttribute="leading" secondItem="QKD-ly-qzy" secondAttribute="leading" id="5Vs-gX-NQZ"/>
                             <constraint firstItem="QKD-ly-qzy" firstAttribute="bottom" secondItem="JJ6-7R-59p" secondAttribute="bottom" id="Eyt-Sp-gaA"/>
-                            <constraint firstItem="JJ6-7R-59p" firstAttribute="top" secondItem="QKD-ly-qzy" secondAttribute="top" constant="20" id="MII-Mk-ShE"/>
+                            <constraint firstItem="JJ6-7R-59p" firstAttribute="top" secondItem="bCV-ds-AiL" secondAttribute="bottom" constant="20" id="MII-Mk-ShE"/>
+                            <constraint firstItem="QKD-ly-qzy" firstAttribute="trailing" secondItem="bCV-ds-AiL" secondAttribute="trailing" constant="20" id="Y0o-oD-r6W"/>
+                            <constraint firstItem="bCV-ds-AiL" firstAttribute="leading" secondItem="QKD-ly-qzy" secondAttribute="leading" constant="20" id="nNk-OX-t8A"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Leaderboard" id="M08-jQ-P6X"/>
                     <connections>
+                        <outlet property="filterSegmentedControl" destination="bCV-ds-AiL" id="AHQ-n7-mfb"/>
                         <outlet property="tableView" destination="JJ6-7R-59p" id="LTb-he-mlw"/>
                     </connections>
                 </viewController>
@@ -133,7 +147,7 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Math Buster" id="lA2-VK-vxm">
-                        <barButtonItem key="rightBarButtonItem" style="plain" id="zSU-tL-Ihf">
+                        <barButtonItem key="rightBarButtonItem" style="done" id="zSU-tL-Ihf">
                             <button key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" id="yxc-yW-P3d">
                                 <rect key="frame" x="288" y="5" width="86" height="34.333333333333336"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -183,7 +197,7 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Level" id="d9Z-IP-VeT">
-                        <barButtonItem key="rightBarButtonItem" style="plain" id="yKr-L5-rnn">
+                        <barButtonItem key="rightBarButtonItem" style="done" id="yKr-L5-rnn">
                             <button key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" id="tcP-YP-5IN">
                                 <rect key="frame" x="288" y="5" width="86" height="34.333333333333336"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>

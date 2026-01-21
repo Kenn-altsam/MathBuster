@@ -146,10 +146,9 @@ class ViewController: UIViewController {
     
     func restart() {
         initializeGame()
+        gameEngine.startGame()
+        updateUIForGameState()
         scheduleTimer()
-        
-        resultField.isEnabled = true
-        submitButton.isEnabled = true
     }
     
 //    @IBAction func segmentedControlValueChanged(_ sender: UISegmentedControl) {
@@ -158,9 +157,8 @@ class ViewController: UIViewController {
     
     func finishTheGame() {
         dataModel.timer?.invalidate()
-        resultField.isEnabled = false
-        submitButton.isEnabled = false
-        
+        gameEngine.finishGame()
+        updateUIForGameState()
         askForName()
     }
     
@@ -185,7 +183,7 @@ class ViewController: UIViewController {
 //            self.saveUserScore(name: text)
             self.saveUserScoreAsStruct(name: text)
             
-            self.navigationController?.popViewController(animated: true)
+//            self.navigationController?.popViewController(animated: true)
         }
         alertController.addAction(saveAction)
         
@@ -199,16 +197,23 @@ class ViewController: UIViewController {
     }
     
     func saveUserScoreAsStruct(name: String) {
-        let userScore: UserScore = UserScore(name: name, score: gameEngine.score)
+        let userScore: UserScore = UserScore(name: name, score: gameEngine.score, difficulty: gameEngine.difficulty, date: Date())
         let difficulty = gameEngine.difficulty
         
-        let userScoreArray: [UserScore] = ViewController.getAllUserScores(level: difficulty) + [userScore]
+        var userScoreArray: [UserScore] = ViewController.getAllUserScores(level: difficulty) + [userScore]
+        
+        userScoreArray.sort { $0.score > $1.score }
+        
+        if userScoreArray.count > 10 {
+            userScoreArray = Array(userScoreArray.prefix(10))
+        }
         
         do {
             let encoder = JSONEncoder()
             let encodedData = try encoder.encode(userScoreArray)
             let userDefaults = UserDefaults.standard
             userDefaults.set(encodedData, forKey: difficulty.key())
+            print("Successfully saved \(userScoreArray.count) scores for \(difficulty.displayName)")
         } catch {
             print("Couldn't encode given [Userscore] into data with error: \(error.localizedDescription)")
         }
@@ -223,7 +228,7 @@ class ViewController: UIViewController {
                 let decoder = JSONDecoder()
                 result = try decoder.decode([UserScore].self, from: data)
             } catch {
-                print("could'n decode given data to [Userscore] with error: \(error.localizedDescription)")
+                print("couldn't decode given data to [Userscore] with error: \(error.localizedDescription)")
             }
         }
         return result
@@ -242,4 +247,29 @@ class ViewController: UIViewController {
 //        let array = userDefaults.array(forKey: ViewControllerDataModel.userScoreKey) as? [[String: Any]]
 //        return array ?? []
 //    }
+}
+
+extension ViewController {
+    func updateUIForGameState() {
+        switch gameEngine.gameState {
+        case .idle:
+            problemLabel.text = "Ready to start?"
+            resultField.isEnabled = false
+            submitButton.isEnabled = false
+            restartButton.setTitle("Start Game", for: .normal)
+            updateUI()
+            
+        case .playing:
+            resultField.isEnabled = true
+            submitButton.isEnabled = true
+            restartButton.setTitle("Restart", for: .normal)
+            updateUI()
+            
+        case .finished:
+            resultField.isEnabled = false
+            submitButton.isEnabled = false
+            problemLabel.text = "Game Over!"
+            
+        }
+    }
 }
