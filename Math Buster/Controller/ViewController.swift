@@ -1,10 +1,3 @@
-//
-//  ViewController.swift
-//  Math Buster
-//
-//  Created by Zhangali Pernebayev on 13.10.2022.
-//
-
 import UIKit
 
 class ViewController: UIViewController {
@@ -17,25 +10,22 @@ class ViewController: UIViewController {
     @IBOutlet weak var resultField: UITextField!
     @IBOutlet weak var submitButton: UIButton!
     @IBOutlet weak var restartButton: UIButton!
-//    @IBOutlet weak var segmentedControl: UISegmentedControl!
     
     var dataModel: ViewControllerDataModel = ViewControllerDataModel()
-    var gameEngine: GameEngine!
-    
+    var viewModel: GameViewModel!
     var selectedDifficulty: Difficulty = .easy
-    
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
         
         setupUI()
-        initializeGame()
+        setUpViewModel()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
+        viewModel.stopGame()
         dataModel.navigationBarPreviousTintColor = navigationController?.navigationBar.tintColor
         navigationController?.navigationBar.tintColor = .white
     }
@@ -43,76 +33,55 @@ class ViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        if !gameEngine.isGameOver(){
-            scheduleTimer()
+        if viewModel.currentState == .idle {
+            viewModel.startGame()
         }
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         
+        viewModel.stopGame()
         navigationController?.navigationBar.tintColor = dataModel.navigationBarPreviousTintColor
-        
-        dataModel.timer?.invalidate()
     }
     
-    override func viewDidDisappear(_ animated: Bool) {
-        super.viewDidDisappear(animated)
+    func setUpViewModel() {
+        viewModel = GameViewModel(difficulty: selectedDifficulty)
         
-        dataModel.timer?.invalidate()
+        viewModel.onStateChanged = { [weak self] state in
+            self?.updateUIForGameState(state)
+        }
+        
+        viewModel.onScoreChanged = { [weak self] score in
+            self?.scoreLabel.text = "Score: \(score)"
+        }
+        
+        viewModel.onTimeChanged = { [weak self] remainingTime in
+            self?.updateTimerUI(remainingTime)
+        }
+        
+        viewModel.onProblemChanged = { [weak self] problemText in
+            self?.problemLabel.text = problemText
+        }
+        
+        viewModel.onGameOver = { [weak self] finalScore in
+            self?.showGameOverAlert(score: finalScore)
+        }
     }
 
     func setupUI() {
-//        navigationItem.title = "New Title"
         timerContainerView.layer.cornerRadius = 5
         resultField.keyboardType = .decimalPad
     }
     
-    func initializeGame() {
-//        let difficulty = getDifficultyFromSegmentedControl()
-        gameEngine = GameEngine(difficulty: selectedDifficulty)
-        gameEngine.generateProblem()
-        updateUI()
-    }
-    
-//    func getDifficultyFromSegmentedControl() -> Difficulty {
-//        switch segmentedControl.selectedSegmentIndex {
-//        case 0:
-//            return .easy
-//        case 1:
-//            return .medium
-//        case 2:
-//            return .hard
-//        default:
-//            return .easy
-//        }
-//    }
-    
-    func updateUI() {
-        scoreLabel.text = "Score: \(gameEngine.score)"
-        problemLabel.text = gameEngine.problemText
-        
-        let seconds: String = String(format: "%02d", gameEngine.remainingTime)
+    @objc
+    func updateTimerUI(_ remainingTime: Int) {
+        let seconds: String = String(format: "%02d", remainingTime)
         timerLabel.text = "00 : \(seconds)"
         
-        let totalTime = gameEngine.difficulty.remainingTime
-        progressView.progress = Float(totalTime - gameEngine.remainingTime) / Float(totalTime)
+        let totalTime = viewModel.totalTime
+        progressView.progress = Float(totalTime - remainingTime) / Float(totalTime)
         print("progressView.progress: \(progressView.progress)")
-    }
-    
-    func scheduleTimer() {
-        dataModel.timer?.invalidate()
-        dataModel.timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(updateTimerUI), userInfo: nil, repeats: true)
-    }
-    
-    @objc
-    func updateTimerUI() {
-        gameEngine.decrementTime()
-        updateUI()
-        
-        if gameEngine.isGameOver() {
-            finishTheGame()
-        }
     }
     
     @IBAction func submitPressed(_ sender: Any) {
@@ -129,79 +98,41 @@ class ViewController: UIViewController {
             return
         }
         
-        if gameEngine.checkAnswer(newResult) {
-            print("Correct answer!")
-        }else{
-            print("Incorrect answer!")
-        }
+        viewModel.submitAnswer(newResult)
         
-        gameEngine.generateProblem()
-        updateUI()
         resultField.text = nil
     }
     
     @IBAction func restartPressed(_ sender: Any) {
-        restart()
+        viewModel.restart()
     }
     
-    func restart() {
-        initializeGame()
-        gameEngine.startGame()
-        updateUIForGameState()
-        scheduleTimer()
-    }
-    
-//    @IBAction func segmentedControlValueChanged(_ sender: UISegmentedControl) {
-//        restart()
-//    }
-    
-    func finishTheGame() {
-        dataModel.timer?.invalidate()
-        gameEngine.finishGame()
-        updateUIForGameState()
-        askForName()
-    }
-    
-    func askForName() {
-        let alertController = UIAlertController(title: "Game is Over!", message: "Save your score: \(gameEngine.score)", preferredStyle: .alert)
+    func showGameOverAlert(score: Int) {
+        let alertController = UIAlertController(title: "Game is Over!", message: "Save your score: \(score)", preferredStyle: .alert)
         alertController.addTextField { textField in
             textField.placeholder = "Enter your name"
         }
         
         let saveAction = UIAlertAction(title: "Save", style: .default) { _ in
-            guard let textField = alertController.textFields?.first else {
-                print("Textfield is absent")
-                return
-            }
-            guard let text = textField.text, !text.isEmpty else {
+            guard let textField = alertController.textFields?.first, let name = textField.text, !name.isEmpty else {
                 print("Text is nil or empty")
                 return
             }
-            print("Name: \(text)")
-            
-            //TO DO: Save user score record permanently on device
-//            self.saveUserScore(name: text)
-            self.saveUserScoreAsStruct(name: text)
-            
-//            self.navigationController?.popViewController(animated: true)
+            self.saveScore(name: name)
         }
         alertController.addAction(saveAction)
         
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
         alertController.addAction(cancelAction)
         
-//        let skipAction = UIAlertAction(title: "Skip", style: .destructive)
-//        alertController.addAction(skipAction)
-        
         present(alertController, animated: true)
     }
     
-    func saveUserScoreAsStruct(name: String) {
-        let userScore: UserScore = UserScore(name: name, score: gameEngine.score, difficulty: gameEngine.difficulty, date: Date())
-        let difficulty = gameEngine.difficulty
+    func saveScore(name: String) {
+        let userScore: UserScore = UserScore(name: name, score: viewModel.currentScore, difficulty: viewModel.difficulty, date: Date())
         
-        var userScoreArray: [UserScore] = ViewController.getAllUserScores(level: difficulty) + [userScore]
-        
+        var userScoreArray = ViewController.getAllUserScores(level: viewModel.difficulty)
+        userScoreArray.append(userScore)
         userScoreArray.sort { $0.score > $1.score }
         
         if userScoreArray.count > 10 {
@@ -212,8 +143,8 @@ class ViewController: UIViewController {
             let encoder = JSONEncoder()
             let encodedData = try encoder.encode(userScoreArray)
             let userDefaults = UserDefaults.standard
-            userDefaults.set(encodedData, forKey: difficulty.key())
-            print("Successfully saved \(userScoreArray.count) scores for \(difficulty.displayName)")
+            userDefaults.set(encodedData, forKey: viewModel.difficulty.key())
+            print("Successfully saved \(userScoreArray.count) scores for \(viewModel.difficulty.displayName)")
         } catch {
             print("Couldn't encode given [Userscore] into data with error: \(error.localizedDescription)")
         }
@@ -233,37 +164,21 @@ class ViewController: UIViewController {
         }
         return result
     }
-    
-//    func saveUserScore(name: String) {
-//        let userScore: [String: Any] = ["name": name, "score": gameEngine.score]
-//        let userScoreArray: [[String: Any]] = getUserScoreArray() + [userScore]
-//        
-//        let userDefaults = UserDefaults.standard
-//        userDefaults.set(userScoreArray, forKey: ViewControllerDataModel.userScoreKey)
-//    }
-//    
-//    func getUserScoreArray() -> [[String: Any]] {
-//        let userDefaults = UserDefaults.standard
-//        let array = userDefaults.array(forKey: ViewControllerDataModel.userScoreKey) as? [[String: Any]]
-//        return array ?? []
-//    }
 }
 
 extension ViewController {
-    func updateUIForGameState() {
-        switch gameEngine.gameState {
+    func updateUIForGameState(_ state: GameState) {
+        switch state {
         case .idle:
             problemLabel.text = "Ready to start?"
             resultField.isEnabled = false
             submitButton.isEnabled = false
             restartButton.setTitle("Start Game", for: .normal)
-            updateUI()
             
         case .playing:
             resultField.isEnabled = true
             submitButton.isEnabled = true
             restartButton.setTitle("Restart", for: .normal)
-            updateUI()
             
         case .finished:
             resultField.isEnabled = false
